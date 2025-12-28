@@ -40,19 +40,19 @@ const map = L.map("map", {
 
 // Basemap with labels (includes country names) + fallback tiles
 const carto = L.tileLayer(
-  "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
-  {
-    attribution:
-      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
-    subdomains: "abcd",
-    maxZoom: 20,
-  }
+    "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+    {
+      attribution:
+          '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+      subdomains: "abcd",
+      maxZoom: 20,
+    }
 ).addTo(map);
 
 // Fallback tiles (OSM standard)
 const osm = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
   attribution:
-    '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
   maxZoom: 19,
 });
 
@@ -250,7 +250,7 @@ async function reverseGeocode(lat, lon) {
   const country = addr.country || "Unknown country";
   const countryCode = (addr.country_code || "").toLowerCase();
   const city =
-    addr.city || addr.town || addr.village || addr.state || addr.county || "";
+      addr.city || addr.town || addr.village || addr.state || addr.county || "";
   const label = city ? `${city}, ${country}` : country;
 
   const out = { label, countryCode };
@@ -287,7 +287,7 @@ map.on("click", async (e) => {
     }
   } catch (err) {
     ui.place.textContent =
-      "Could not reverse-geocode (network issue or rate limit).";
+        "Could not reverse-geocode (network issue or rate limit).";
   }
 });
 
@@ -331,14 +331,26 @@ async function handleSearch() {
 
     map.setView([res.lat, res.lon], 4, { animate: true });
 
-    // Populate clicked card with the found location, but keep label from search.
-    const off = offsetFromLon(res.lon);
+    // Populate clicked card with the found location
+    let off = offsetFromLon(res.lon);
+    let placeLabel = res.label;
+
+    try {
+      // reuse reverseGeocode() to get country_code, then apply override if present
+      const geo = await reverseGeocode(res.lat, res.lon);
+      placeLabel = geo.label;
+
+      const forced = COUNTRY_TZ_OVERRIDE[geo.countryCode];
+      if (typeof forced === "number") off = forced;
+    } catch (_) {
+      // ignore lookup failures; keep approximate longitude offset
+    }
 
     clickedState.lat = res.lat;
     clickedState.lon = res.lon;
     clickedState.off = off;
 
-    ui.place.textContent = res.label;
+    ui.place.textContent = placeLabel;
     ui.clickLatlon.textContent = `${res.lat.toFixed(4)}, ${res.lon.toFixed(4)}`;
     ui.clickTz.textContent = fmtOffset(off);
     ui.clickLocalTime.textContent = formatLocalTimeFromOffset(off);
