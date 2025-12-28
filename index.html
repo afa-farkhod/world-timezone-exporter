@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>World Timezone Explorer</title>
+  <meta name="description" content="Interactive world map that shows approximate timezone bands and current local time under the cursor." />
+  <link rel="stylesheet" href="./style.css" />
+
+  <!-- Leaflet (CDN) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="anonymous">
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo">🌍</div>
+      <div class="title">
+        <h1>World Timezone Explorer</h1>
+        <p>Move your mouse to see the <b>approximate timezone</b> (by longitude) and the current time there.</p>
+      </div>
+    </div>
+
+    <div class="controls">
+      <div class="search">
+        <input id="searchInput" type="text" placeholder="Search a place (e.g., Seoul, Tashkent, Paris) …" />
+        <button id="searchBtn" type="button" title="Search">Search</button>
+      </div>
+      <label class="toggle">
+        <input id="toggleBands" type="checkbox" checked />
+        <span>Show timezone bands</span>
+      </label>
+    </div>
+  </header>
+
+  <main class="layout">
+    <div id="map" aria-label="World map"></div>
+
+    <aside class="panel" aria-label="Information panel">
+      <section class="card">
+        <h2>Cursor</h2>
+        <div class="grid">
+          <div class="k">Lat / Lon</div><div class="v" id="latlon">—</div>
+          <div class="k">Timezone (approx)</div><div class="v" id="tz">—</div>
+          <div class="k">Local time (approx)</div><div class="v" id="localTime">—</div>
+          <div class="k">UTC time</div><div class="v" id="utcTime">—</div>
+        </div>
+        <p class="hint">
+          This app uses <b>longitude-based</b> timezone bands (15° per hour). Real-world timezones follow borders and DST rules.
+        </p>
+      </section>
+
+      <section class="card">
+        <h2>Clicked location</h2>
+        <div class="grid">
+          <div class="k">Place</div><div class="v" id="place">Click the map to reverse-geocode a country/city.</div>
+          <div class="k">Lat / Lon</div><div class="v" id="clickLatlon">—</div>
+          <div class="k">Timezone (approx)</div><div class="v" id="clickTz">—</div>
+          <div class="k">Local time (approx)</div><div class="v" id="clickLocalTime">—</div>
+        </div>
+        <p class="hint small">
+          Reverse geocoding uses OpenStreetMap's Nominatim public endpoint with caching & a gentle rate limit.
+          For heavy usage, host your own geocoder.
+        </p>
+      </section>
+
+      <section class="card">
+        <h2>Legend</h2>
+        <div class="legend">
+          <div class="swatch current"></div><div>Current band under cursor</div>
+          <div class="swatch band"></div><div>Other bands</div>
+        </div>
+        <p class="hint small">
+          Map tiles © OpenStreetMap contributors (via Carto basemap). Timezone bands are generated client-side.
+        </p>
+      </section>
+
+      <footer class="footer">
+        <a href="https://github.com/" target="_blank" rel="noreferrer">Host on GitHub Pages</a>
+        <span>•</span>
+        <a href="./README.md" target="_blank" rel="noreferrer">README</a>
+      </footer>
+    </aside>
+  </main>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin="anonymous"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
