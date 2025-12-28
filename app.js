@@ -7,6 +7,15 @@
 
 const el = (id) => document.getElementById(id);
 
+// override table
+const COUNTRY_TZ_OVERRIDE = {
+  kr: 9, // South Korea
+  kp: 9, // North Korea
+  jp: 9, // Japan
+  cn: 8, // China (single national timezone)
+  // add more here
+};
+
 const ui = {
   latlon: el("latlon"),
   tz: el("tz"),
@@ -218,17 +227,19 @@ async function reverseGeocode(lat, lon) {
 
   const addr = data.address || {};
   const country = addr.country || "Unknown country";
+  const countryCode = (addr.country_code || "").toLowerCase();
   const city =
     addr.city || addr.town || addr.village || addr.state || addr.county || "";
   const label = city ? `${city}, ${country}` : country;
 
-  clickedState.cache.set(key, label);
-  return label;
+  const out = { label, countryCode };
+  clickedState.cache.set(key, out);
+  return out;
 }
 
 map.on("click", async (e) => {
   const { lat, lng } = e.latlng;
-  const off = offsetFromLon(lng);
+  let off = offsetFromLon(lng);
   clickedState.lat = lat;
   clickedState.lon = lng;
   clickedState.off = off;
@@ -242,8 +253,15 @@ map.on("click", async (e) => {
   clickMarker.setOpacity(1);
 
   try {
-    const label = await reverseGeocode(lat, lng);
-    ui.place.textContent = label;
+    const geo = await reverseGeocode(lat, lng);
+    ui.place.textContent = geo.label;
+
+    const forced = COUNTRY_TZ_OVERRIDE[geo.countryCode];
+    if (typeof forced === "number") {
+      off = forced;
+      clickedState.off = off;
+      ui.clickTz.textContent = fmtOffset(off);
+      ui.clickLocalTime.textContent = formatLocalTimeFromOffset(off);
   } catch (err) {
     ui.place.textContent =
       "Could not reverse-geocode (network issue or rate limit).";
