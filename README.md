@@ -27,7 +27,6 @@ An interactive world map that:
 
 > ⚠️ For heavier traffic, host your own geocoder and replace the URLs in `app.js`.
 
-----
 
 ## Attribution
 
